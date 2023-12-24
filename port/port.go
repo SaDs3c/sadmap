@@ -1,10 +1,14 @@
-package port                                                                                                                    import (                                                                "errors"
-        "net"                                                           "strconv"
+package port                                                                                                                    
+import (                                                          
+        "errors"
+        "net"                                                          
+        "strconv"
         "strings"
         "time"
 )
 
-type ScanResult struct {                                                Port  string
+type ScanResult struct {                                               
+        Port  string
         State string
 }
 

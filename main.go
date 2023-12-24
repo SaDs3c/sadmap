@@ -40,7 +40,7 @@ func main() {
                 }
         }
         printTable(results)
-        fmt.println("Scaning as Ended.")
+        fmt.Println("Scaning as Ended.")
 }
 
 func printBanner(fileName string) {

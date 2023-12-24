@@ -16,7 +16,7 @@ type ScanResult struct {
 func ScanPort(protocol, hostname string, port int) ScanResult {
         result := ScanResult{Port: protocol + "/" + strconv.Itoa(port)}
         address := hostname + ":" + strconv.Itoa(port)
-        conn, err := net.DialTimeout(protocol, address, 60*time.Second)
+        conn, err := net.DialTimeout(protocol, address, 1*time.Second)
 
         if err != nil {
                 result.State = "Closed"

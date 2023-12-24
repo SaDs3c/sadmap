@@ -1,22 +1,17 @@
-package port
-
-import (
-        "errors"
-        "net"
-        "strconv"
+package port                                                                                                                    import (                                                                "errors"
+        "net"                                                           "strconv"
         "strings"
         "time"
 )
 
-type ScanResult struct {
-        Port  string
+type ScanResult struct {                                                Port  string
         State string
 }
 
 func ScanPort(protocol, hostname string, port int) ScanResult {
         result := ScanResult{Port: protocol + "/" + strconv.Itoa(port)}
         address := hostname + ":" + strconv.Itoa(port)
-        conn, err := net.DialTimeout(protocol, address, 1*time.Second)
+        conn, err := net.DialTimeout(protocol, address, 500*time.Millisecond)
 
         if err != nil {
                 result.State = "Closed"
@@ -38,7 +33,8 @@ func ScanPorts(hostname string, start, end int) []ScanResult {
 
         return results
 }
-// (like., "1-25")
+
+// Helper function to parse port range string (e.g., "1-25")
 func ParsePortRange(portRange string) (int, int, error) {
         parts := strings.Split(portRange, "-")
         if len(parts) != 2 {
@@ -57,6 +53,8 @@ func ParsePortRange(portRange string) (int, int, error) {
 
         return start, end, nil
 }
+
+// Helper function to parse single port string (e.g., "80")
 func ParseSinglePort(portStr string) (int, error) {
         port, err := strconv.Atoi(portStr)
         if err != nil {

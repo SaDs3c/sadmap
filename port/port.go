@@ -1,4 +1,5 @@
-package port                                                                                                                    
+package port
+
 import (                                                          
         "errors"
         "net"                                                          
@@ -58,7 +59,7 @@ func ParsePortRange(portRange string) (int, int, error) {
         return start, end, nil
 }
 
-// Helper function to parse single port string (e.g., "80")
+// parse parser
 func ParseSinglePort(portStr string) (int, error) {
         port, err := strconv.Atoi(portStr)
         if err != nil {

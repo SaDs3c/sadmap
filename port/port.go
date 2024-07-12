@@ -1,70 +1,79 @@
 package port
 
-import (                                                          
-        "errors"
-        "net"                                                          
-        "strconv"
-        "strings"
-        "time"
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
-type ScanResult struct {                                               
-        Port  string
-        State string
+func ParsePortInput(portInput string) ([]int, error) {
+	var ports []int
+
+	// By comma
+	portList := strings.Split(portInput, ",")
+	for _, part := range portList {
+		// by hyphen -- range
+		if strings.Contains(part, "-") {
+			start, end, err := ParsePortRange(part)
+			if err != nil {
+				return nil, err
+			}
+			// Create list for the range
+			for i := start; i <= end; i++ {
+				ports = append(ports, i)
+			}
+		} else {
+			// Single port
+			portNum, err := ParseSinglePort(part)
+			if err != nil {
+				return nil, err
+			}
+			ports = append(ports, portNum)
+		}
+	}
+
+	return ports, nil
 }
 
-func ScanPort(protocol, hostname string, port int) ScanResult {
-        result := ScanResult{Port: protocol + "/" + strconv.Itoa(port)}
-        address := hostname + ":" + strconv.Itoa(port)
-        conn, err := net.DialTimeout(protocol, address, 500*time.Millisecond)
+func ParseSinglePort(portStr string) (int, error) {
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return 0, err
+	}
 
-        if err != nil {
-                result.State = "Closed"
-                return result
-        }
-        defer conn.Close()
+	if port > 65535 {
+		return 0, fmt.Errorf("ports specified must be between 0 and 65535 inclusive")
+	}
 
-        result.State = "Open"
-        return result
-}
-
-func ScanPorts(hostname string, start, end int) []ScanResult {
-        var results []ScanResult
-
-        for i := start; i <= end; i++ {
-                results = append(results, ScanPort("tcp", hostname, i))
-                results = append(results, ScanPort("udp", hostname, i))
-        }
-
-        return results
+	return port, nil
 }
 
 // Helper function to parse port range string (e.g., "1-25")
 func ParsePortRange(portRange string) (int, int, error) {
-        parts := strings.Split(portRange, "-")
-        if len(parts) != 2 {
-                return 0, 0, errors.New("invalid port range format")
-        }
+	parts := strings.Split(portRange, "-")
+	if len(parts) != 2 {
+		return 0, 0, errors.New("invalid port range format")
+	}
 
-        start, err := strconv.Atoi(parts[0])
-        if err != nil {
-                return 0, 0, err
-        }
+	start, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, err
+	}
 
-        end, err := strconv.Atoi(parts[1])
-        if err != nil {
-                return 0, 0, err
-        }
+	end, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, 0, err
+	}
 
-        return start, end, nil
-}
+	if start > end {
+		return 0, 0, fmt.Errorf("your port range %d-%d is backwards. Did you mean %d-%d?",
+			start, end, end, start)
+	}
 
-// parse parser
-func ParseSinglePort(portStr string) (int, error) {
-        port, err := strconv.Atoi(portStr)
-        if err != nil {
-                return 0, err
-        }
+	if end > 65535 {
+		return 0, 0, fmt.Errorf("ports specified must be between 0 and 65535 inclusive")
+	}
 
-        return port, nil
+	return start, end, nil
 }
